@@ -1,0 +1,22 @@
+{
+  "name": "async-socket-rn",
+  "version": "0.1.0",
+  "summary": "A short description of async-socket-rn.",
+  "description": "TODO: Add long description of the pod here.",
+  "homepage": "https://github.com/bensonz/async-socket-rn",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "bensonz": "mr.bz@hotmail.com"
+  },
+  "source": {
+    "git": "https://github.com/bensonz/async-socket-rn.git",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "8.0"
+  },
+  "source_files": "async-socket-rn/Classes/**/*"
+}

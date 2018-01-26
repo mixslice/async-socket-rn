@@ -1,0 +1,6 @@
+framework module async_socket_rn {
+  umbrella header "async-socket-rn-umbrella.h"
+
+  export *
+  module * { export * }
+}

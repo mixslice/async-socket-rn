@@ -1,0 +1,16 @@
+PODS:
+  - async-socket-rn (0.1.0)
+
+DEPENDENCIES:
+  - async-socket-rn (from `../`)
+
+EXTERNAL SOURCES:
+  async-socket-rn:
+    :path: ../
+
+SPEC CHECKSUMS:
+  async-socket-rn: 5486ccc415a49817d65985693c5619c8b06731c3
+
+PODFILE CHECKSUM: 1c33ba1c80f72d9fcddcaa29143ac7ea9919197d
+
+COCOAPODS: 1.3.1
