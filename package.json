@@ -1,0 +1,50 @@
+{
+  "name": "async-socket-rn",
+  "version": "0.1",
+  "description": "an async socket for react native",
+  "main": "index.js",
+  "scripts": {
+    "postinstall": "sh postinstall.sh",
+    "start": "node node_modules/react-native/local-cli/cli.js start",
+    "run:packager": "./node_modules/react-native/packager/packager.sh",
+    "run:ios": "react-native run-ios --project-path ./example/ios",
+    "lint": "eslint ./",
+    "build": "npm run build:js && npm run build:ios",
+    "build:js": "exit 0",
+    "build:ios":
+      "bundle install --binstubs ./examples/ios && bundle exec pod install --project-directory=./example/ios/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bensonz/async-socket-rn.git"
+  },
+  "keywords": [],
+  "author": "Bensonz <mr.bz@hotmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/bensonz/async-socket-rn#readme",
+  "peerDependencies": {
+    "react": ">=16.0.0",
+    "react-native": ">=0.50"
+  },
+  "dependencies": {
+    "prop-types": "^15.5.10",
+    "react-native-safe-module": "^1.1.0"
+  },
+  "devDependencies": {
+    "babel-eslint": "^6.1.2",
+    "babel-plugin-module-resolver": "^2.3.0",
+    "babel-preset-airbnb": "^1.1.1",
+    "babel-preset-react-native": "1.9.0",
+    "eslint": "^3.3.1",
+    "eslint-config-airbnb": "^10.0.1",
+    "eslint-import-resolver-babel-module": "^2.2.1",
+    "eslint-plugin-import": "^1.14.0",
+    "eslint-plugin-jsx-a11y": "^2.1.0",
+    "eslint-plugin-prefer-object-spread": "^1.1.0",
+    "eslint-plugin-react": "^6.1.2",
+    "gitbook-cli": "^2.3.0",
+    "murmur2js": "^1.0.0",
+    "react": "^16.1.1",
+    "react-native": "^0.50.4"
+  }
+}

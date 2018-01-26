@@ -6,19 +6,18 @@
 # To learn more about a Podspec see http://guides.cocoapods.org/syntax/podspec.html
 #
 
+require 'json'
+
+package = JSON.parse(File.read(File.join(__dir__, 'package.json')))
+
 Pod::Spec.new do |s|
   s.name             = 'async-socket-rn'
-  s.version          = '0.1.0'
-  s.summary          = 'A short description of async-socket-rn.'
+  s.version          = package['version']
+  s.summary          = 'TCP socket pod for react native'
 
-# This description is used to generate tags and improve search results.
-#   * Think: What does it do? Why did you write it? What is the focus?
-#   * Try to keep it short, snappy and to the point.
-#   * Write the description between the DESC delimiters below.
-#   * Finally, don't worry about the indent, CocoaPods strips it!
 
   s.description      = <<-DESC
-TODO: Add long description of the pod here.
+This pod simply exports a js bridge for react native to use asyncSocket
                        DESC
 
   s.homepage         = 'https://github.com/bensonz/async-socket-rn'
@@ -29,14 +28,11 @@ TODO: Add long description of the pod here.
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
   s.ios.deployment_target = '8.0'
+  s.platform     = :ios, "8.0"
 
   s.source_files = 'async-socket-rn/Classes/**/*'
-  
-  # s.resource_bundles = {
-  #   'async-socket-rn' => ['async-socket-rn/Assets/*.png']
-  # }
 
-  # s.public_header_files = 'Pod/Classes/**/*.h'
-  # s.frameworks = 'UIKit', 'MapKit'
-  # s.dependency 'AFNetworking', '~> 2.3'
+  s.dependency 'React'
+  s.frameworks = 'UIKit'
+
 end

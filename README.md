@@ -7,14 +7,15 @@
 
 ## Example
 
-To run the example project, clone the repo, and run `pod install` from the Example directory first.
+To run the example project, clone the repo, and run `pod install` from the
+example directory first.
 
 ## Requirements
 
 ## Installation
 
-async-socket-rn is available through [CocoaPods](http://cocoapods.org). To install
-it, simply add the following line to your Podfile:
+async-socket-rn is available through [CocoaPods](http://cocoapods.org). To
+install it, simply add the following line to your Podfile:
 
 ```ruby
 pod 'async-socket-rn'
@@ -26,4 +27,5 @@ bensonz, mr.bz@hotmail.com
 
 ## License
 
-async-socket-rn is available under the MIT license. See the LICENSE file for more info.
+async-socket-rn is available under the MIT license. See the LICENSE file for
+more info.
