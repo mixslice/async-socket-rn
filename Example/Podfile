@@ -1,0 +1,11 @@
+use_frameworks!
+
+target 'async-socket-rn_Example' do
+  pod 'async-socket-rn', :path => '../'
+
+  target 'async-socket-rn_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end
