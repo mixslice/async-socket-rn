@@ -1,1 +1,1 @@
-module.exports = require("./async-socket-rn/js");
+module.exports = require("./RNAsyncSocket/js");

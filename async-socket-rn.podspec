@@ -30,9 +30,10 @@ This pod simply exports a js bridge for react native to use asyncSocket
   s.ios.deployment_target = '8.0'
   s.platform     = :ios, "8.0"
 
-  s.source_files = 'async-socket-rn/Classes/**/*'
+  s.source_files = "RNAsyncSocket/ios/*.{h,m,swift}"
 
   s.dependency 'React'
+  s.dependency 'CocoaAsyncSocket'
   s.frameworks = 'UIKit'
 
 end
