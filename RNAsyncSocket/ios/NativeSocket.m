@@ -13,10 +13,10 @@
 
 @interface RCT_EXTERN_MODULE(NativeSocket, NSObject)
 
-RCT_EXTERN_METHOD(hello)
 RCT_EXTERN_METHOD(initialise:(nonnull NSNumber)p config:(NSDictionary) config)
-RCT_EXTERN_METHOD(connect)
+RCT_EXTERN_METHOD(connect:(RCTResponseSenderBlock) callback)
 RCT_EXTERN_METHOD(disconnect)
-RCT_EXTERN_METHOD(send:(NSString)data)
+RCT_EXTERN_METHOD(send:(NSString) data)
+RCT_EXTERN_METHOD(receive:(RCTResponseSenderBlock) callback)
 
 @end

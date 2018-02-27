@@ -10,52 +10,31 @@ class NativeSocket {
       config = {};
     }
 
-    this.sockets = NativeModule.NativeSocket;
+    this.sockets = NativeModules.NativeSocket;
     this.isConnected = false;
-    this.handlers = {};
-    this.onAnyHandler = null;
-
-    // Set default handlers
-    this.defaultHandlers = {
-      connect: () => {
-        this.isConnected = true;
-      },
-
-      disconnect: () => {
-        this.isConnected = false;
-      }
-    };
 
     // Set initial configuration
-    this.sockets.initialise(host, config);
+    this.sockets.initialise(port, config);
   }
 
-  _handleEvent(event) {
-    if (this.handlers.hasOwnProperty(event.name))
-      this.handlers[event.name](
-        event.hasOwnProperty("items") ? event.items : null
-      );
-
-    if (this.defaultHandlers.hasOwnProperty(event.name))
-      this.defaultHandlers[event.name]();
-
-    if (this.onAnyHandler) this.onAnyHandler(event);
+  send(msg) {
+    if (this.isConnected) {
+      this.sockets.send(msg);
+    }
   }
 
-  connect() {
-    this.sockets.connect();
+  receive(cb) {
+    this.sockets.receive(cb);
   }
 
-  on(event, handler) {
-    this.handlers[event] = handler;
-  }
-
-  onAny(handler) {
-    this.onAnyHandler = handler;
-  }
-
-  emit(event, data) {
-    this.sockets.emit(event, data);
+  connect(success, failure) {
+    this.sockets.connect((error, events) => {
+      if (error) {
+        failure(error);
+      }
+      this.isConnected = true;
+      success(events);
+    });
   }
 
   disconnect() {

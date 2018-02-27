@@ -13,50 +13,30 @@ import CocoaAsyncSocket
 class NativeSocket: NSObject {
   var port: NSNumber
   var logString: String
-  var socket: GCDAsyncSocket?
   var config: NSDictionary?
+  var socket: GCDAsyncSocket?
+  var receiveCB : RCTResponseSenderBlock?
 
   override init(){
     self.logString = ""
     self.port = 1234
   }
 
-  func constructMessage(original:String) -> String {
-    return "[[::\(original)::]]"
-  }
-
-
   /**
    * All EXTERN method
    */
 
-  @objc(hello)
-  func hello() -> Void {
-    if (self.socket == nil){
-      self.socket = GCDAsyncSocket(delegate: self, delegateQueue: DispatchQueue.main)
-    }
-    do {
-      try self.socket?.accept(onPort: self.port as! UInt16)
-    } catch {
-      //  failure to create socket
-      print(" ==== Failed to connect ==== ")
-      return
-    }
-    //  successfully created such socket
-    print(" ==== Connected ==== ")
-    let data = "hello world"
-    let msg = self.constructMessage(original: data as String)
+  @objc(send:)
+  func send(_ data:NSString) -> Void{
+    let msg = data as String
     let msgData: Data = msg.data(using: .utf8)!
 
     self.socket?.write(msgData, withTimeout: -1, tag: 0)
   }
 
-  @objc(send:)
-  func send(_ data:NSString) -> Void{
-    let msg = self.constructMessage(original: data as String)
-    let msgData: Data = msg.data(using: .utf8)!
-
-    self.socket?.write(msgData, withTimeout: -1, tag: 0)
+  @objc(receive:)
+  func receive(_ cb:@escaping RCTResponseSenderBlock) -> Void {
+    self.receiveCB = cb
   }
 
   @objc(initialise:config:)
@@ -65,19 +45,20 @@ class NativeSocket: NSObject {
     self.config = config
   }
 
-  @objc(connect)
-  func connect() -> Void {
+  @objc(connect:)
+  func connect(_ cb:RCTResponseSenderBlock) -> Void {
     if (self.socket == nil) {
       self.socket = GCDAsyncSocket(delegate: self, delegateQueue: DispatchQueue.main)
     }
     if (self.socket?.isConnected)! {
+      cb([NSNull(), "Already connected"])
       return
     }
     do {
       try self.socket?.accept(onPort: self.port as! UInt16)
-      print(" ==== Connected ==== ")
+      cb([NSNull(), "New connection successfull"])
     } catch {
-      print(" ==== Failed to connect ==== ")
+      cb([NSNull(), "New connection failed"])
     }
   }
 
@@ -95,10 +76,6 @@ class NativeSocket: NSObject {
 extension NativeSocket: GCDAsyncSocketDelegate {
 
   func socket(_ sock: GCDAsyncSocket, didAcceptNewSocket newSocket: GCDAsyncSocket) {
-    let host: String = newSocket.connectedHost!
-    let port: UInt16 = newSocket.connectedPort
-
-    self.logString = "接受新连接 host:\(host), port:\(port)"
     self.socket = newSocket
     newSocket.readData(to: "===file===".data(using: .utf8)!, withTimeout: -1, tag: 0)
   }
