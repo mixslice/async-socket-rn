@@ -10,16 +10,15 @@ import Foundation
 import CocoaAsyncSocket
 
 @objc(NativeSocket)
-class NativeSocket: NSObject {
+class NativeSocket: RCTEventEmitter {
+  // RCTEventEmitter is also an NSObject so we can only let our class be one
   var port: NSNumber
-  var logString: String
-  var config: NSDictionary?
+  var msgStopper: String
   var socket: GCDAsyncSocket?
-  var receiveCB : RCTResponseSenderBlock?
 
   override init(){
-    self.logString = ""
     self.port = 1234
+    self.msgStopper = "::]]"
   }
 
   /**
@@ -31,18 +30,14 @@ class NativeSocket: NSObject {
     let msg = data as String
     let msgData: Data = msg.data(using: .utf8)!
 
+    print("writing:\(msg) to socket")
     self.socket?.write(msgData, withTimeout: -1, tag: 0)
   }
 
-  @objc(receive:)
-  func receive(_ cb:@escaping RCTResponseSenderBlock) -> Void {
-    self.receiveCB = cb
-  }
-
-  @objc(initialise:config:)
-    func initialise(port:NSNumber, config:NSDictionary) -> Void {
+  @objc(initialise:stopper:)
+    func initialise(port:NSNumber, stopper:NSString) -> Void {
     self.port = port
-    self.config = config
+    self.msgStopper = stopper as String
   }
 
   @objc(connect:)
@@ -58,16 +53,17 @@ class NativeSocket: NSObject {
       try self.socket?.accept(onPort: self.port as! UInt16)
       cb([NSNull(), "New connection successfull"])
     } catch {
-      cb([NSNull(), "New connection failed"])
+      // connection failed
+      cb(["new connection failed"])
     }
   }
-
 
   @objc(disconnect)
   func disconnect() -> Void {
     self.socket?.disconnect()
     return
   }
+
 }
 
 /**
@@ -77,29 +73,39 @@ extension NativeSocket: GCDAsyncSocketDelegate {
 
   func socket(_ sock: GCDAsyncSocket, didAcceptNewSocket newSocket: GCDAsyncSocket) {
     self.socket = newSocket
-    newSocket.readData(to: "===file===".data(using: .utf8)!, withTimeout: -1, tag: 0)
+    newSocket.readData(to: self.msgStopper.data(using: .utf8)!, withTimeout: -1, tag: 0)
   }
 
   func socketDidDisconnect(_ sock: GCDAsyncSocket, withError err: Error?) {
-    self.logString = "断开连接: \(String(describing: err))"
+    self.sendEvent(withName: "disconnected", body: "ok")
   }
 
   func socket(_ sock: GCDAsyncSocket, didConnectToHost host: String, port: UInt16) {
-    self.logString = "连接到 host: \(host) port: \(port)"
+    self.sendEvent(withName: "connected", body: "\(host),\(port)")
   }
 
   func socket(_ sock: GCDAsyncSocket, didWriteDataWithTag tag: Int) {
-    self.logString = "写入数据"
+    self.sendEvent(withName: "writeData", body: "ok")
   }
 
   func socket(_ sock: GCDAsyncSocket, didReadPartialDataOfLength partialLength: UInt, tag: Int) {
-    self.logString = "partialLength: \(partialLength)"
+    self.sendEvent(withName: "readDataPartialLength", body: "\(partialLength)")
   }
 
   func socket(_ sock: GCDAsyncSocket, didRead data: Data, withTag tag: Int) {
-    let meta = data.subdata(in: 0..<16)
-    let fileData = data.subdata(in: 16..<data.count)
-    self.logString = "meta: \(String.init(data: meta, encoding: .utf8)!)"
-    sock.readData(to: "===file===".data(using: .utf8)!, withTimeout: -1, tag: 0)
+    self.sendEvent(withName: "read", body: String(data: data, encoding: .utf8) )
+    sock.readData(to: self.msgStopper.data(using: .utf8)!, withTimeout: -1, tag: 0)
   }
+}
+
+/**
+ * extension for our object to be an event emitter
+ */
+extension NativeSocket {
+    // Returns an array of your named events
+    override func supportedEvents() -> [String]! {
+        return ["connected","disconnected","writeData","readDataPartialLength","read"]
+    }
+
+
 }

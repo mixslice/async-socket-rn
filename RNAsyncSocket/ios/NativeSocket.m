@@ -11,12 +11,11 @@
 #import "RCTBridgeModule.h"
 #import "NativeSocket.h"
 
-@interface RCT_EXTERN_MODULE(NativeSocket, NSObject)
+@interface RCT_EXTERN_MODULE(NativeSocket, RCTEventEmitter <RCTBridgeModule>)
 
-RCT_EXTERN_METHOD(initialise:(nonnull NSNumber)p config:(NSDictionary) config)
-RCT_EXTERN_METHOD(connect:(RCTResponseSenderBlock) callback)
+RCT_EXTERN_METHOD(initialise:(nonnull NSNumber)p stopper:(NSString) stopper)
+RCT_EXTERN_METHOD(connect:(RCTResponseSenderBlock) cb)
 RCT_EXTERN_METHOD(disconnect)
 RCT_EXTERN_METHOD(send:(NSString) data)
-RCT_EXTERN_METHOD(receive:(RCTResponseSenderBlock) callback)
 
 @end

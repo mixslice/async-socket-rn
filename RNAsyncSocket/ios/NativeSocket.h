@@ -6,4 +6,5 @@
 //  Copyright © 2018 Mixslice. All rights reserved.
 //
 
+#import <React/RCTEventEmitter.h>
 #import <React/RCTBridgeModule.h>
