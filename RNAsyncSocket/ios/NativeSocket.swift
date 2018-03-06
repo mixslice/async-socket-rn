@@ -93,7 +93,7 @@ extension NativeSocket: GCDAsyncSocketDelegate {
   }
 
   func socket(_ sock: GCDAsyncSocket, didRead data: Data, withTag tag: Int) {
-    self.sendEvent(withName: "read", body: String(data: data, encoding: .utf8) )
+    self.sendEvent(withName: "read", body: data.base64EncodedString(options: .lineLength64Characters))
     sock.readData(to: self.msgStopper.data(using: .utf8)!, withTimeout: -1, tag: 0)
   }
 }
