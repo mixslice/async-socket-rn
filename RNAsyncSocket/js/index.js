@@ -11,6 +11,7 @@ class NativeSocket {
 
     this.sockets = NativeModules.NativeSocket;
     this.eventEmitter = new NativeEventEmitter(this.sockets);
+    this.subscriptions = [];
 
     this.isConnected = false;
 
@@ -35,12 +36,16 @@ class NativeSocket {
     });
   }
   disconnect() {
+    let i;
+    for (i = 0; i < this.subscriptions.length; i += 1) {
+      this.subscriptions[i].remove();
+    }
     this.sockets.disconnect();
   }
 
   on(event, handler) {
     try {
-      this.eventEmitter.addListener(event, handler);
+      this.subscriptions.push(this.eventEmitter.addListener(event, handler));
     } catch (e) {
       console.log(e);
     }
