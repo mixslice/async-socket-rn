@@ -8,14 +8,6 @@
 
 import Foundation
 import CocoaAsyncSocket
-import UIImageExtension
-
-
-// Sandbox Paths
-let homePath: String = NSHomeDirectory()
-let libraryPath: String = homePath + "/Library/"
-let documentsPath: String = homePath + "/Documents/"
-let tmpPath: String = homePath + "/tmp/"
 
 @objc(NativeSocket)
 class NativeSocket: RCTEventEmitter {
@@ -106,17 +98,22 @@ extension NativeSocket: GCDAsyncSocketDelegate {
         let metaString: String = String(data: metaData, encoding: .utf8) ?? "unknown"
         if (metaString.contains("msg://")) {
             // If a messag is put, send it to JS to handle
-            self.sendEvent(withName: "read", body: data.base64EncodedString(options: .lineLength64Characters))
+            self.sendEvent(withName: "read", body: String(data: data, encoding: .utf8))
         } else if (metaString.contains("file://")) {
             // If a file is put, save the file locally, then send the file dir to js to handle
             let index = metaString.index(metaString.startIndex, offsetBy: 7)
             let meta = metaString[index...].trimmingCharacters(in: .whitespaces)
             let fileData: Data = data.subdata(in: length..<data.count)
-            processImageData(fileData: fileData, meta: String(meta))
+            if #available(iOS 11.0, *) {
+                processImageData(fileData: fileData, meta: String(meta))
+            } else {
+                // Fallback on earlier versions
+            }
         }
         sock.readData(to: self.msgStopper.data(using: .utf8)!, withTimeout: -1, tag: 0)
     }
 
+    @available(iOS 11.0, *)
     func processImageData(fileData: Data, meta: String) {
         let originalImage: UIImage? = UIImage(data: fileData)
 
@@ -131,25 +128,30 @@ extension NativeSocket: GCDAsyncSocketDelegate {
         }
         else if (meta.contains("right")) {
             fullImage = originalImage?.mx_imageRotate(true)
+        }else{
+            fullImage = originalImage
         }
 
         // WARNING: - 内存爆炸
         displayImage = fullImage?.mx_imageByResizeTo(CGSize(width: 345.0, height: 518.0))
         fullImage = fullImage?.mx_imageByResizeTo(CGSize(width: 3456.0, height: 5184.0))
 
-        let displayImagePath : String = tmpPath + "thumbnail" + meta
-        let fullImagePath : String = tmpPath + meta
+//        let documents : NSString = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as NSString
+        let tmpPath : NSString = NSTemporaryDirectory() as NSString
 
-        displayImage?.mx_writeHEICImageTo(displayImagePath + ".heic", compressionQuality: 1.0)
-        fullImage?.mx_writeHEICImageTo(fullImagePath + ".heic", compressionQuality: 1.0)
+        let displayImagePath : String = tmpPath.appendingPathComponent("thumbnail" + meta + ".heic")
+        let fullImagePath : String = tmpPath.appendingPathComponent(meta + ".heic")
+
+        displayImage?.mx_writeHEICImageTo(displayImagePath, compressionQuality: 1.0)
+        fullImage?.mx_writeHEICImageTo(fullImagePath, compressionQuality: 1.0)
+
 
         self.sendImagePath(displayImagePath: displayImagePath, fullImagePath: fullImagePath)
     }
 
     func sendImagePath(displayImagePath : String, fullImagePath : String) {
         var toSend : String = "file://"
-        let fileType: String = ".heic"
-        toSend += displayImagePath + fileType + ":" + fullImagePath + fileType
+        toSend += displayImagePath + ":" + fullImagePath
         self.sendEvent(withName: "read", body: toSend)
     }
 }
