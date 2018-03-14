@@ -9,6 +9,7 @@
 import UIKit
 import AVFoundation
 
+@available(iOS 11.0, *)
 extension UIImage {
 
     // MARK: - 公开方法
