@@ -1,6 +1,6 @@
 {
   "name": "async-socket-rn",
-  "version": "0.1",
+  "version": "0.1.0",
   "description": "an async socket for react native",
   "main": "index.js",
   "scripts": {
