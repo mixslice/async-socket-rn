@@ -30,7 +30,6 @@ class NativeSocket: RCTEventEmitter {
         let msg = data as String
         let msgData: Data = msg.data(using: .utf8)!
 
-        print("writing:\(msg) to socket")
         self.socket?.write(msgData, withTimeout: -1, tag: 0)
     }
 
@@ -40,21 +39,21 @@ class NativeSocket: RCTEventEmitter {
         self.msgStopper = stopper as String
     }
 
-    @objc(connect:)
-    func connect(_ cb:RCTResponseSenderBlock) -> Void {
+    @objc(listen:)
+    func listen(_ cb:RCTResponseSenderBlock) -> Void {
         if (self.socket == nil) {
             self.socket = GCDAsyncSocket(delegate: self, delegateQueue: DispatchQueue.main)
         }
         if (self.socket?.isConnected)! {
-            cb([NSNull(), "Already connected"])
+            cb([NSNull(), "Already listening"])
             return
         }
         do {
             try self.socket?.accept(onPort: self.port as! UInt16)
-            cb([NSNull(), "New connection successfull"])
+            cb([NSNull(), "Start listening on port \(self.port)"])
         } catch {
             // connection failed
-            cb(["new connection failed"])
+            cb(["Cannot listen on port \(port)"])
         }
     }
 
@@ -74,12 +73,17 @@ extension NativeSocket: GCDAsyncSocketDelegate {
     // a new socket connection is created
     func socket(_ sock: GCDAsyncSocket, didAcceptNewSocket newSocket: GCDAsyncSocket) {
         self.socket = newSocket
+        self.sendEvent(withName: "connected", body: "new")
         newSocket.readData(to: self.msgStopper.data(using: .utf8)!, withTimeout: -1, tag: 0)
     }
 
     // the socket disconnects
     func socketDidDisconnect(_ sock: GCDAsyncSocket, withError err: Error?) {
-        self.sendEvent(withName: "disconnected", body: "ok")
+        if(err==nil){
+            self.sendEvent(withName: "disconnected", body: "old")
+        }else{
+            self.sendEvent(withName: "disconnected", body: String(describing: err))
+        }
     }
 
     // the socket successfully connects to the host with specific port
