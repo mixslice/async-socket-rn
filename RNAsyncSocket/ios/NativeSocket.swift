@@ -71,30 +71,37 @@ class NativeSocket: RCTEventEmitter {
  */
 extension NativeSocket: GCDAsyncSocketDelegate {
 
+    // a new socket connection is created
     func socket(_ sock: GCDAsyncSocket, didAcceptNewSocket newSocket: GCDAsyncSocket) {
         self.socket = newSocket
         newSocket.readData(to: self.msgStopper.data(using: .utf8)!, withTimeout: -1, tag: 0)
     }
 
+    // the socket disconnects
     func socketDidDisconnect(_ sock: GCDAsyncSocket, withError err: Error?) {
         self.sendEvent(withName: "disconnected", body: "ok")
     }
 
+    // the socket successfully connects to the host with specific port
     func socket(_ sock: GCDAsyncSocket, didConnectToHost host: String, port: UInt16) {
         self.sendEvent(withName: "connected", body: "\(host),\(port)")
     }
 
+    // the socket successfully writes data
     func socket(_ sock: GCDAsyncSocket, didWriteDataWithTag tag: Int) {
         self.sendEvent(withName: "writeData", body: "ok")
     }
 
+    // the socket reads some data with specific length
     func socket(_ sock: GCDAsyncSocket, didReadPartialDataOfLength partialLength: UInt, tag: Int) {
         self.sendEvent(withName: "readDataPartialLength", body: "\(partialLength)")
     }
 
+    // the socket reads data
     func socket(_ sock: GCDAsyncSocket, didRead data: Data, withTag tag: Int) {
         let length = min(data.count, 20)
         let metaData: Data = data.subdata(in: 0..<length)
+        // try to transform the data into String
         let metaString: String = String(data: metaData, encoding: .utf8) ?? "unknown"
         if (metaString.contains("msg://")) {
             // If a messag is put, send it to JS to handle
@@ -107,12 +114,18 @@ extension NativeSocket: GCDAsyncSocketDelegate {
             if #available(iOS 11.0, *) {
                 processImageData(fileData: fileData, meta: String(meta))
             } else {
-                // Fallback on earlier versions
+                // Nothing happens
             }
         }
+        // keep reading
         sock.readData(to: self.msgStopper.data(using: .utf8)!, withTimeout: -1, tag: 0)
     }
+}
 
+/*
+ * extension for images processing
+ */
+extension NativeSocket {
     @available(iOS 11.0, *)
     func processImageData(fileData: Data, meta: String) {
         let originalImage: UIImage? = UIImage(data: fileData)
@@ -136,7 +149,6 @@ extension NativeSocket: GCDAsyncSocketDelegate {
         displayImage = fullImage?.mx_imageByResizeTo(CGSize(width: 345.0, height: 518.0))
         fullImage = fullImage?.mx_imageByResizeTo(CGSize(width: 3456.0, height: 5184.0))
 
-//        let documents : NSString = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as NSString
         let tmpPath : NSString = NSTemporaryDirectory() as NSString
 
         let displayImagePath : String = tmpPath.appendingPathComponent("thumbnail" + meta + ".heic")
@@ -144,7 +156,6 @@ extension NativeSocket: GCDAsyncSocketDelegate {
 
         displayImage?.mx_writeHEICImageTo(displayImagePath, compressionQuality: 1.0)
         fullImage?.mx_writeHEICImageTo(fullImagePath, compressionQuality: 1.0)
-
 
         self.sendImagePath(displayImagePath: displayImagePath, fullImagePath: fullImagePath)
     }
