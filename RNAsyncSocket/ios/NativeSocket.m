@@ -14,7 +14,7 @@
 @interface RCT_EXTERN_MODULE(NativeSocket, RCTEventEmitter <RCTBridgeModule>)
 
 RCT_EXTERN_METHOD(initialise:(nonnull NSNumber)p stopper:(NSString) stopper)
-RCT_EXTERN_METHOD(connect:(RCTResponseSenderBlock) cb)
+RCT_EXTERN_METHOD(listen:(RCTResponseSenderBlock) cb)
 RCT_EXTERN_METHOD(disconnect)
 RCT_EXTERN_METHOD(send:(NSString) data)
 
