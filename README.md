@@ -27,9 +27,10 @@ that means when you need to use this data, you need to do something like
 This project now is very specific to our cskin project, if you wish to use it
 for general purpose, I have tagged a release 0.1 for that.
 
-The socket reads message data and returns a string; reads file(image) data, then
-transforms and saves the file locally at /tmp path and returns two paths of the
-file to JS, one for thumbnail and one for original image.
+The socket reads message data and returns a string with header `msg://`; reads
+file(image) data, then transforms and saves the file locally at /tmp path and
+returns two paths of the file to JS, one for thumbnail and one for original
+image, with header `file://`
 
 ## Usage
 
@@ -40,7 +41,7 @@ import NativeSocket from 'async-socket-rn';
 // below is the default setting
 ns = new NativeSocket(2345, '::]]');
 
-ns.connect();
+ns.listen();
 ns.send('Anything');
 // important: disconnect removes all handlers
 ns.disconnect();
@@ -54,8 +55,24 @@ ns.disconnect();
   "read"]
 */
 
-ns.on("connected",(data)=>{/* do something */})
+ns.on("connected",(type)=>{/* do something */})
+ns.on("disconnected",(type)=>{/* do something */})
+ns.on("writeData",('ok')=>{/* do something */})
+ns.on("readDataPartialLength",(length)=>{/* do something */})
+ns.on("read",(data)=>{/* do something */})
 ```
+
+##### Connected/Disconnected type
+
+Here I wish to talk more about this type in returned data. In event connected,
+`type === 'new'` means a new socket connection is successfully established.
+Otherwise type is of form "host,port" I am actually not quit sure when the
+"host,port" type is send because when I test it it was never sent.
+
+For the event disconnected, `type === 'old'` means an old socket is
+disconnected, usually means you manually called disconnect function. Otherwise
+the type is an string of error that probably means the socket is closed by the
+other end or something else (not you anyway).
 
 | commands              | called when                                                                      |
 | --------------------- | -------------------------------------------------------------------------------- |
