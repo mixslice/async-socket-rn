@@ -17,6 +17,18 @@ class NativeSocket {
 
     // Set initial configuration
     this.sockets.initialise(port, stopper);
+
+    this.on("connected", type => {
+      if (type === "new") {
+        this.isConnected = true;
+      }
+    });
+
+    this.on("disconnected", type => {
+      if (type !== "old") {
+        this.isConnected = false;
+      }
+    });
   }
 
   // sends a string message
@@ -25,22 +37,21 @@ class NativeSocket {
       this.sockets.send(msg);
     }
   }
-  connect() {
-    this.sockets.connect((err, event) => {
+  listen(succ, fail) {
+    this.sockets.listen((err, event) => {
       if (err) {
-        console.log("Connection failed", err);
+        fail(err);
         return;
       }
-      console.log("Connection successfull", event);
-      this.isConnected = true;
+      succ(event);
     });
   }
   disconnect() {
+    this.sockets.disconnect();
     let i;
     for (i = 0; i < this.subscriptions.length; i += 1) {
       this.subscriptions[i].remove();
     }
-    this.sockets.disconnect();
   }
 
   on(event, handler) {
