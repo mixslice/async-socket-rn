@@ -116,9 +116,9 @@ extension NativeSocket: GCDAsyncSocketDelegate {
             let meta = metaString[index...].trimmingCharacters(in: .whitespaces)
             let fileData: Data = data.subdata(in: length..<data.count)
             if #available(iOS 11.0, *) {
-                processImageData(fileData: fileData, meta: String(meta))
-            } else {
-                // Nothing happens
+                DispatchQueue.global(qos: .background).async {
+                    self.processImageData(fileData: fileData, meta: String(meta))
+                }
             }
         }
         // keep reading
