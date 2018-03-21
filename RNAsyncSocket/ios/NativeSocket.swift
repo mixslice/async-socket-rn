@@ -15,6 +15,7 @@ class NativeSocket: RCTEventEmitter {
     var port: NSNumber
     var msgStopper: String
     var socket: GCDAsyncSocket?
+    var serialQueue = DispatchQueue(label: "socketQueue")
 
     override init(){
         self.port = 1234
@@ -109,14 +110,16 @@ extension NativeSocket: GCDAsyncSocketDelegate {
         let metaString: String = String(data: metaData, encoding: .utf8) ?? "unknown"
         if (metaString.contains("msg://")) {
             // If a messag is put, send it to JS to handle
-            self.sendEvent(withName: "read", body: String(data: data, encoding: .utf8))
+            serialQueue.async {
+              self.sendEvent(withName: "read", body: String(data: data, encoding: .utf8))
+            }
         } else if (metaString.contains("file://")) {
             // If a file is put, save the file locally, then send the file dir to js to handle
             let index = metaString.index(metaString.startIndex, offsetBy: 7)
             let meta = metaString[index...].trimmingCharacters(in: .whitespaces)
             let fileData: Data = data.subdata(in: length..<data.count)
             if #available(iOS 11.0, *) {
-                DispatchQueue.global(qos: .background).async {
+                self.serialQueue.async{
                     self.processImageData(fileData: fileData, meta: String(meta))
                 }
             }
@@ -155,7 +158,7 @@ extension NativeSocket {
 
         let tmpPath : NSString = NSTemporaryDirectory() as NSString
 
-        let displayImagePath : String = tmpPath.appendingPathComponent("thumbnail" + meta + ".heic")
+        let displayImagePath : String = tmpPath.appendingPathComponent("thumbnail_" + meta + ".heic")
         let fullImagePath : String = tmpPath.appendingPathComponent(meta + ".heic")
 
         displayImage?.mx_writeHEICImageTo(displayImagePath, compressionQuality: 1.0)
