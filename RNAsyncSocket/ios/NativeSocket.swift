@@ -161,8 +161,8 @@ extension NativeSocket {
         let displayImagePath : String = tmpPath.appendingPathComponent("thumbnail_" + meta + ".heic")
         let fullImagePath : String = tmpPath.appendingPathComponent(meta + ".heic")
 
-        displayImage?.mx_writeHEICImageTo(displayImagePath, compressionQuality: 1.0)
-        fullImage?.mx_writeHEICImageTo(fullImagePath, compressionQuality: 1.0)
+        displayImage?.mx_writeHEICImageTo(displayImagePath, compressionQuality: 0.9)
+        fullImage?.mx_writeHEICImageTo(fullImagePath, compressionQuality: 0.9)
 
         self.sendImagePath(displayImagePath: displayImagePath, fullImagePath: fullImagePath)
     }
